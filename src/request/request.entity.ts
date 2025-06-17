@@ -1,45 +1,31 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToOne,
-  CreateDateColumn,
-} from 'typeorm';
-import { User } from '../users/user.entity';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { User } from '../user/user.entity';
 import { Approval } from '../approval/approval.entity';
-import { Item } from '../items/item.entity';
+import { RequestItem } from './request_item.entity';
+import { BaseEntity } from '../common/entities/base.entity';
 
 export enum RequestStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
+  PENDING = 'Pending',
+  APPROVED = 'Approved',
+  REJECTED = 'Rejected',
 }
 
-@Entity()
-export class Request {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+@Entity('requests')
+export class Request extends BaseEntity {
   @ManyToOne(() => User, (user) => user.requests)
   user: User;
-
-  @ManyToOne(() => Item, (item) => item.requests)
-  item: Item;
 
   @Column()
   quantity: number;
 
-  @Column({
-    type: 'enum',
-    enum: RequestStatus,
-    default: RequestStatus.PENDING,
+  @Column()
+  status: string = RequestStatus.PENDING;
+
+  @OneToMany(() => Approval, (approval) => approval.request)
+  approvals: Approval;
+
+  @OneToMany(() => RequestItem, (requestItem) => requestItem.request, {
+    cascade: true,
   })
-  status: RequestStatus;
-
-  @OneToOne(() => Approval, (approval) => approval.request)
-  approval: Approval;
-
-  @CreateDateColumn()
-  createdAt: Date;
+  requestItems: RequestItem[];
 }

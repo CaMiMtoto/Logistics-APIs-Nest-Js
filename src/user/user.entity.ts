@@ -1,17 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Request } from '../requests/request.entity';
+import { Entity, Column, OneToMany, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Request } from '../request/request.entity';
+import { BaseEntity } from '../common/entities/base.entity';
+import * as bcrypt from 'bcrypt';
 
 export enum UserRole {
-  STAFF = 'STAFF',
-  APPROVER = 'APPROVER',
-  ADMIN = 'ADMIN',
+  STAFF = 'Staff',
+  APPROVER = 'Approver',
+  ADMIN = 'Admin',
 }
 
-@Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+@Entity('users')
+export class User extends BaseEntity {
   @Column()
   name: string;
 
@@ -26,4 +25,12 @@ export class User {
 
   @OneToMany(() => Request, (request) => request.user)
   requests: Request[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
 }

@@ -1,20 +1,24 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Request } from '../requests/request.entity';
+import { Entity, Column, OneToMany } from 'typeorm';
+import { RequestItem } from '../request/request_item.entity';
+import { BaseEntity } from '../common/entities/base.entity';
 
-@Entity()
-export class Item {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+@Entity('items')
+export class Item extends BaseEntity {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   description: string;
 
   @Column()
   quantity: number;
 
-  @OneToMany(() => Request, (request) => request.item)
-  requests: Request[];
+  @Column({
+    nullable: true,
+    length: 50,
+  })
+  package: string;
+
+  @OneToMany(() => RequestItem, (ri) => ri.item)
+  requestItems: RequestItem[];
 }
